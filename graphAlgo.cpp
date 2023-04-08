@@ -303,9 +303,131 @@ void findingMinDistance_usingDijkstraAlgo(int **arr, int nV)
 	delete [] distance;
 }
       
+/* 
+ 
+Considering (arr[i].weight) = distance between vertex (arr[i].startV) & (arr[i].endV)                          
+distance[i] = minDistanceOfVertex'i'FromVertex'0'
+
+Iteration0: distance[i]Of(0'sNeighbours)WillBeUpdated,  
+Iteration1: distance[i]Of(0'sNeighbours + 0'sNextNeighbours)WillBeUpdated 
+Iteration2: distance[i]Of(0'sNeighbours + 0'sNextNeighbours + 0'sNextToNextNeighbours)WillBeUpdated 
+Iteration3: distance[i]Of(0'sNeighbours + 0'sNextNeighbours + 0'sNextToNextNeighbours + 0'sNextToNextToNextNeighbours)WillBeUpdated 
+    .                           .
+    .                           .
+	.                           .
+    .                           .
+    .                           .
+    
+(INT_MAX + integer) willCauseMemoryOverflow thatsWhyWeAreChecking (distance[v1]!=INT_MAX)
+ifGraphContainsNegativeEdgeCycle thenShortestPathFindingAlgorithmsWillNotWork         
+ifAfterRunningOneMoreIterationOf'j' distance[i]OfAnyVertexVaries thenItMeansGraphContainsNegativeEdgeCycle [MethodToDetectNegativeEdgeCycle]      
+    
+*/                               
+                        
+                                
+class Edge                                                    // node of EdgeList  
+{     public:
+	int startV;                                               // starting vertex of edge (v1)     
+	int endV;                                                 // ending vertex of edge (v2)        
+	int weight;                                               // weight of edge                  
+};
+
+
+void findingMinDistance_usingBellmanFordAlgo(int nV, int nE, Edge *arr)
+{                                                             // calculating minDistance of eachVertex from vertex 0  
+	int *distance = new int[nV];                            
+	for(int i=0; i<nV; i++)                             
+	distance[i] = INT_MAX;                                    // initially distance of vertex 'i' from vertex 0  is oo 
+	 
+	 
+	distance[0] = 0;   
+	
+	for(int i=0; i<nV; i++)                                   // In'i'thIterationOnAll'nE'Edges, pathUsingAtmost'i'EdgesWillBeConsidered
+	{
+		for(int j=0; j<nE; j++)                             
+		{
+			int v1 = arr[j].startV;
+			int v2 = arr[j].endV;
+			int w = arr[j].weight;
+			
+			if((distance[v1]!=INT_MAX) && ((distance[v1] + w) < distance[v2]))
+			distance[v2] = distance[v1] + w;                 
+		}
+	}
+	 
+	for(int i=0; i<nV; i++)
+    cout << distance[i] << endl; 
+}
+
       
+/*
+
+using DP
+valid for directed graph having +ve/0/-ve edge values
+considering edge value arr[i][j] = distance between vertex i & j                                        
+(weight = value of edge) (distance[i] = distance of vertex 'i' from its parentVertex which is vertex 0 here) 
+minDistance between i & j = minDistanceOfVertex'i'FromVertex'0' - minDistanceOfVertex'j'FromVertex'0'     
+distance[i][j] = minDistanceBetweenVertex'i'AndVertex'j'
+
+(INT_MAX + integer) willCauseMemoryOverflow thatsWhyWeAreChecking (distance[i][k]!=INT_MAX) & (distance[k][j]!=INT_MAX)                                            
+keep for loop of k on top, otherwise error, bczThen updationOf'k'AsIntermediateVertexForAll'i'&'j' in'k'thIteration 
+
+*/                              
+                                         
+                                                                                                            
+int** storeInputGraph(int nV, int nE)
+{
+	int **arr = new int*[nV];                    // creating adjacency matrix  
+	for(int i=0; i<nV; i++)  
+	{  arr[i] = new int[nV];
+	
+	   for(int j=0; j<nV; j++)
+	   arr[i][j] = INT_MAX;	}                  // directed graph
+	
+	for(int i=0; i<nE; i++)                      // storing weighted graph    
+	{  int v1, v2, weight;
+	   cin>>v1>>v2>>weight;
+	   arr[v1][v2] = weight;  }                 
+	
+	return arr;
+}
       
-      
+                           
+void findingMinRelativeDistance_usingFloydWarshallAlgo(int **arr, int nV)
+{
+	int **distance = new int*[nV];
+	for(int i=0; i<nV; i++)
+	{   distance[i] = new int[nV];
+	 
+	 	for(int j=0; j<nV; j++)
+	 	{   if(i==j)
+            distance[i][j] = 0;
+            else
+		    distance[i][j] = arr[i][j];   }      // initially (minDistanceBetween'i'And'j' = EdgeValue'arr[i][j]')
+    }
+	                                                                                     
+	for(int k=0; k<nV; k++)                      // considering'k'AsIntermediateVertex updatingMinDistanceBetweenAll'i'&'j' 
+	{   for(int i=0; i<nV; i++)                  // keep for loop of k on top, otherwise error 
+    	{	for(int j=0; j<nV; j++)            
+	    	{ 
+		     	if((distance[i][k]!=INT_MAX) && (distance[k][j]!=INT_MAX) && ((distance[i][k] + distance[k][j]) < distance[i][j]))
+		    	distance[i][j] = distance[i][k] + distance[k][j];
+		    }
+		}
+	}
+	                                                                            
+				                                                                                     
+	for(int i=0; i<nV; i++)
+	{   for(int j=0; j<nV; j++)
+		{
+			if(distance[i][j]==INT_MAX)
+			cout<<"INF ";                        // INF = infinity
+			else
+			cout<<distance[i][j]<<" ";
+		} 
+		cout<<endl;
+	} 
+}
 
 
 
